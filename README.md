@@ -53,6 +53,69 @@ This case study applies a **full production-grade ML pipeline** — from raw dat
 
 ---
 
+## 🏗️ ML Pipeline Architecture
+
+```
+┌─────────────────────────────────────────────┐
+│         Patient CSV Cohorts                 │
+│     4,163 records · 14 features             │
+└──────────────────┬──────────────────────────┘
+                   │
+                   ▼
+┌─────────────────────────────────────────────┐
+│   Exploratory Data Analysis  (§3)           │
+│   Heatmap · class distribution · features  │
+└──────────────────┬──────────────────────────┘
+                   │
+                   ▼
+┌─────────────────────────────────────────────┐
+│   Preprocessing  (§4)                       │
+│   Mean imputation · StandardScaler          │
+│   Stratified 80/20 train-test split         │
+└──────┬───────────────────────────────┬──────┘
+       │  supervised branch            │ unsupervised branch
+       ▼                               ▼
+┌─────────────────────────────┐  ┌─────────────────────────┐
+│  5 Classification Models    │  │  K-Means Clustering (§6) │
+│                             │  │  Elbow method → k=3      │
+│  Logistic Regression (§5)   │  │  Cancer rate per cluster  │
+│  Random Forest base  (§5)   │  └─────────────┬───────────┘
+│  Random Forest tuned (§9)   │                │
+│  XGBoost             (§10)  │                │
+│  SVM RBF             (§11)  │                │
+└──────────────┬──────────────┘                │
+               │                               │
+               ▼                               │
+┌─────────────────────────────────────────────┐│
+│  10-Fold Stratified Cross-Validation (§8)   ││
+│  Mean ± std accuracy · generalisation check ││
+└──────────────┬──────────────────────────────┘│
+               │                               │
+       ┌───────┴────────┐                      │
+       ▼                ▼                      │
+┌────────────┐  ┌──────────────────┐           │
+│  ROC-AUC   │  │ Precision-Recall │           │
+│  All models│  │ Curve + optimal  │           │
+│  (§12)     │  │ threshold (§15)  │           │
+└─────┬──────┘  └───────┬──────────┘           │
+      └────────┬─────────┘                     │
+               ▼                               │
+┌─────────────────────────────────────────────┐│
+│   SHAP Explainability (§13)                 ││
+│   Beeswarm · bar · per-patient force plot   ││
+│   Audit-ready for clinical deployment       ││
+└──────────────┬──────────────────────────────┘│
+               │    ◄────────────────────────── ┘
+               ▼
+┌─────────────────────────────────────────────┐
+│   Clinical Risk Scoring System (§14)        │
+│   Low (< 0.40) · Moderate (0.40–0.70)       │
+│   High (≥ 0.70) → triage action mapped      │
+└─────────────────────────────────────────────┘
+```
+
+---
+
 ## 📂 Repository Structure
 
 ```
